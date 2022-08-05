@@ -165,13 +165,31 @@ WORKDIR /build/gcc/build
 COPY --from=kernel /var/buildlibs/kernel /var/builds/sysroot
 COPY --from=glibc /var/buildlibs/glibc /var/builds/sysroot
 RUN --mount=source=configure.sh,target=/usr/bin/configure.sh IS_GCC_BUILD=1 configure.sh \
-        --enable-default-pie \
-        --enable-languages=c,c++,fortran \
         --disable-multilib \
-        --prefix=/var/buildlibs/gcc \
+        --enable-checking=release \
+        --enable-clocale=gnu \
+        --enable-default-pie \
+        --enable-gnu-unique-object \
+        --enable-languages=c,c++,fortran \
+        --enable-libphobos-checking=release \
+        --enable-libstdcxx-debug \
         --enable-libstdcxx-threads \
+        --enable-libstdcxx-time=yes \
+        --enable-link-serialization=2 \
+        --enable-linker-build-id \
+        --enable-nls \
+        --enable-objc-gc=auto \
+        --enable-plugin \
+        --enable-shared \
+        --enable-threads=posix \
+        --prefix=/var/buildlibs/gcc \
         --with-build-sysroot=/var/builds/sysroot \
+        --with-default-libstdcxx-abi=new \
+        --with-pic \
         --with-sysroot=/var/builds/sysroot \
+        --with-target-system-zlib=auto \
+        --without-cuda-driver \
+        --without-included-gettext \
         || (cat config.log && exit 1)
 RUN make --jobs $(nproc) all-gcc
 RUN make install-gcc

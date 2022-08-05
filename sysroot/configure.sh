@@ -61,6 +61,8 @@ elif [[ "${ARCH}" == "x86_64" ]]; then
         --build=x86_64-linux-gnu
         --host="${target}"
         --target="${target}"
+        --with-abi=m64
+        --with-tune=generic
     )
     readonly toolchain_root="/opt/gcc/x86_64"
     readonly toolchain_prefix="${toolchain_root}/bin/x86_64-linux"
