@@ -178,12 +178,9 @@ RUN make install-gcc
 RUN rm -v "/opt/gcc/${ARCH}/bin/"*{gcc,g++,cpp}
 ENV PATH="/var/buildlibs/gcc/bin:${PATH}"
 RUN make --jobs $(nproc)
-RUN make uninstall
 RUN make install all-target-libgcc
 RUN make install all-target-libgfortran
 RUN make install all-target-libstdc++-v3
-RUN rm -rf /var/buildlibs/gcc/bin
-RUN rm -rf /var/buildlibs/gcc/usr/bin
 
 ####################################################################################################
 # Extra libs
@@ -289,10 +286,15 @@ RUN make DESTDIR=/var/buildlibs/libX11 install
 # Assemble final sysroots
 ####################################################################################################
 
+FROM build_image AS gcc_libs
+COPY --from=gcc /var/buildlibs/gcc /var/buildlibs/gcc
+RUN rm -rf /var/buildlibs/gcc/bin
+RUN rm -rf /var/buildlibs/gcc/usr/bin
+
 FROM build_image AS sysroot_base
 COPY --from=kernel /var/buildlibs/kernel /var/builds/sysroot
 COPY --from=glibc /var/buildlibs/glibc /var/builds/sysroot
-COPY --from=gcc /var/buildlibs/gcc /var/builds/sysroot
+COPY --from=gcc_libs /var/buildlibs/gcc /var/builds/sysroot
 
 FROM build_image AS sysroot_X11
 COPY --from=sysroot_base /var/builds/sysroot /var/builds/sysroot
