@@ -17,8 +17,8 @@
 
 repo_root=$(git rev-parse --show-toplevel)
 
-"${repo_root}/sysroot/build.sh" x86_64 "${repo_root}/sysroot" base
-"${repo_root}/sysroot/build.sh" armv7 "${repo_root}/sysroot" base
-"${repo_root}/sysroot/build.sh" aarch64 "${repo_root}/sysroot" base
+"${repo_root}/toolchain/build/build.sh" x86_64 "${repo_root}/toolchain/build" base
+"${repo_root}/toolchain/build/build.sh" armv7 "${repo_root}/toolchain/build" base
+"${repo_root}/toolchain/build/build.sh" aarch64 "${repo_root}/toolchain/build" base
 
-"${repo_root}/sysroot/build.sh" x86_64 "${repo_root}/sysroot" X11
+"${repo_root}/toolchain/build/build.sh" x86_64 "${repo_root}/toolchain/build" X11

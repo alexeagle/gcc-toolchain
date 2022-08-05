@@ -40,11 +40,12 @@ fi
 
 echo "INFO: building sysroot inside container..."
 
-sysroot_dir="$(git rev-parse --show-toplevel)/sysroot"
+repo_root=$(git rev-parse --show-toplevel)
+build_dir="${repo_root}/toolchain/build"
 output=$(realpath "${output_dir}/sysroot-${variant}-${arch}.tar.xz")
 image_tag=$(tr '[:upper:]' '[:lower:]' <<<"sysroot-${variant}-${arch}")
 
-(cd "${sysroot_dir}"; \
+(cd "${build_dir}"; \
     docker build \
         --build-arg ARCH="${arch}" \
         --tag "${image_tag}" \
