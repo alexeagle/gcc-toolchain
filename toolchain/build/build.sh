@@ -38,21 +38,22 @@ if [ -z "${variant}" ]; then
     exit 1
 fi
 
-echo "INFO: building sysroot inside container..."
+echo "INFO: building toolchain inside container..."
 
 repo_root=$(git rev-parse --show-toplevel)
 build_dir="${repo_root}/toolchain/build"
-output=$(realpath "${output_dir}/sysroot-${variant}-${arch}.tar.xz")
+output_gcc_binaries=$(realpath "${output_dir}/gcc-${arch}.tar.xz")
+output_sysroot=$(realpath "${output_dir}/sysroot-${variant}-${arch}.tar.xz")
 image_tag=$(tr '[:upper:]' '[:lower:]' <<<"sysroot-${variant}-${arch}")
 
 (cd "${build_dir}"; \
     docker build \
         --build-arg ARCH="${arch}" \
         --tag "${image_tag}" \
-        --target "sysroot_${variant}" \
+        --target "toolchains_${variant}" \
         .)
 
-echo "INFO: exporting sysroot to '${output}'..."
+echo "INFO: initializing container..."
 
 tmpdir="$(mktemp -d)"
 function remove_tmpdir {
@@ -67,12 +68,21 @@ function remove_container {
 }
 trap remove_container EXIT
 
-docker cp "${container_id}:/var/builds/sysroot" "${tmpdir}"
 readonly os_name="$(uname -s)"
 if [[ "${os_name}" == "Linux" ]]; then
     readonly cpus="$(nproc --all)"
 elif [[ "${os_name}" == "Darwin" ]]; then
     readonly cpus="$(sysctl -n hw.ncpu)"
 fi
-(cd "${tmpdir}/sysroot"; tar --create --file /dev/stdout . | XZ_DEFAULTS="--threads ${cpus}" xz -9e > "${output}")
-shasum -a 256 "${output}"
+
+echo "INFO: exporting sysroot to '${output_sysroot}'..."
+
+docker cp "${container_id}:/var/builds/sysroot" "${tmpdir}"
+(cd "${tmpdir}/sysroot"; tar --create --file /dev/stdout . | XZ_DEFAULTS="--threads ${cpus}" xz -9e > "${output_sysroot}")
+shasum -a 256 "${output_sysroot}"
+
+echo "INFO: exporting gcc binaries to '${output_gcc_binaries}'..."
+
+docker cp "${container_id}:/var/builds/gcc" "${tmpdir}"
+(cd "${tmpdir}/gcc"; tar --create --file /dev/stdout . | XZ_DEFAULTS="--threads ${cpus}" xz -9e > "${output_gcc_binaries}")
+shasum -a 256 "${output_gcc_binaries}"

@@ -307,13 +307,16 @@ RUN make DESTDIR=/var/buildlibs/libX11 install
 FROM build_image AS gcc_libs
 COPY --from=gcc /var/buildlibs/gcc /var/buildlibs/gcc
 RUN rm -rf /var/buildlibs/gcc/bin
-RUN rm -rf /var/buildlibs/gcc/usr/bin
 
-FROM build_image AS sysroot_base
+FROM build_image AS gcc_bins
+COPY --from=gcc /var/buildlibs/gcc/bin /var/builds/gcc/bin
+
+FROM build_image AS toolchains_base
 COPY --from=kernel /var/buildlibs/kernel /var/builds/sysroot
 COPY --from=glibc /var/buildlibs/glibc /var/builds/sysroot
 COPY --from=gcc_libs /var/buildlibs/gcc /var/builds/sysroot
+COPY --from=gcc_bins /var/builds/gcc /var/builds/gcc
 
-FROM build_image AS sysroot_X11
+FROM build_image AS toolchains_X11
 COPY --from=sysroot_base /var/builds/sysroot /var/builds/sysroot
 COPY --from=libX11 /var/buildlibs/libX11 /var/builds/sysroot
