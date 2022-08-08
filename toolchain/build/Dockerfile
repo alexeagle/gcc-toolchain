@@ -58,6 +58,11 @@ RUN curl --fail-early --location https://ftp.gnu.org/gnu/gcc/gcc-10.3.0/gcc-10.3
         | tar --xz --extract --strip-components=1 --file -
 RUN ./contrib/download_prerequisites
 
+FROM base_image AS binutils_download
+WORKDIR /downloads/binutils
+RUN curl --fail-early --location https://ftp.gnu.org/gnu/binutils/binutils-2.39.tar.xz \
+        | tar --xz --extract --strip-components=1 --file -
+
 FROM base_image AS util-macros_download
 WORKDIR /downloads/util-macros
 RUN curl --fail-early --location https://www.x.org/releases/X11R7.7/src/util/util-macros-1.17.tar.gz \
